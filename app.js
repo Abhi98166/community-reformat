@@ -1,7 +1,7 @@
 const express = require("express");
 const fs = require('fs');
-var {parse} = require('csv-parse');
-var {stringify} = require('csv-stringify');
+const {parse} = require('csv-parse');
+const converter = require('json-2-csv')
 var data;
 var parser = parse({columns: true,delimiter : '|'}, function (err, records) {
     data = records;
@@ -12,16 +12,18 @@ var parser = parse({columns: true,delimiter : '|'}, function (err, records) {
         data[row]['ItemType'] = 'content';
         data[row]['ItemTags'] = data[row].contentTags;
     }
+    console.log(typeof records);
 	console.log(data[0]);
+    converter.json2csv(data, (err, csv) => {
+        if (err) {
+            throw err;
+        }
+        fs.writeFileSync(__dirname+'/csv/final-data.csv', csv)
+    });
 });
 fs.createReadStream(__dirname+'/csv/data.csv').pipe(parser);
 
-/*stringify([data], {
-    header: true,
-}, function (err, output) {
-    console.log(err);
-    fs.writeFile(__dirname+'/csv/someData.csv', output);
-});*/
+
 
 const app = express();
 
